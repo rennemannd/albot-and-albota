@@ -132,11 +132,12 @@ class ALBotMessageClear(commands.Cog, name='Message Clear'):
             # deletes bot message, user msg, then loops through channel deleting messages
             await bot_msg.delete()
             await user_msg.delete()
-            async for message in ctx.channel.history(limit=int(a_number)):
-                if not message.pinned:
-                    await message.delete()
-                    await asyncio.sleep(0.4)
-            await ctx.channel.send(content='@{} Successfully deleted {} messages'.format(ctx.author, int(a_number)))
+
+            def not_pinned(m):
+                return m.pinned == False
+
+            deleted = await ctx.channel.purge(limit=a_number, check=not_pinned, bulk=True)
+            await ctx.channel.send(content='@{} Successfully deleted {} messages'.format(ctx.author, int(deleted)))
 
 def setup(bot):
     bot.add_cog(ALBotMessageDeletionHandlers(bot, SQLConnection()))
